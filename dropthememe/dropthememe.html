@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DropTheMeme — Overlay de groupe pour gamers</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080a0f;
+  --surface:#0e1118;
+  --surface2:#141720;
+  --border:#1e2330;
+  --accent:#e8ff47;
+  --accent2:#ff4f6d;
+  --accent3:#4fffd4;
+  --text:#f0f2f8;
+  --muted:#6b7280;
+  --font:'Space Grotesk',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;overflow-x:hidden;font-weight:400}
+
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.6
+}
+.grid-bg{
+  position:absolute;inset:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black 30%,transparent 100%);
+  pointer-events:none
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 2.5rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(8,10,15,.85);
+  backdrop-filter:blur(12px);
+}
+.nav-logo{font-family:var(--font);font-weight:800;font-size:1.2rem;color:var(--accent)}
+.nav-logo span{color:var(--accent2)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{
+  background:var(--accent);color:#080a0f;
+  border:none;padding:.5rem 1.25rem;border-radius:6px;
+  font-family:var(--font);font-weight:700;font-size:.875rem;
+  cursor:pointer;text-decoration:none;transition:opacity .2s,transform .15s
+}
+.nav-cta:hover{opacity:.9;transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:8rem 2rem 4rem;overflow:hidden
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--surface2);border:1px solid var(--border);
+  padding:.35rem 1rem;border-radius:100px;
+  font-family:var(--mono);font-size:.75rem;color:var(--muted);
+  margin-bottom:2rem;animation:fadeUp .6s ease both
+}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+.hero h1{
+  font-family:var(--font);font-weight:800;
+  font-size:clamp(3rem,8vw,6.5rem);
+  line-height:1;letter-spacing:-.03em;margin-bottom:1.5rem;
+  animation:fadeUp .6s .1s ease both
+}
+.accent-y{color:var(--accent)}
+.accent-r{color:var(--accent2)}
+.hero-sub{
+  max-width:540px;color:var(--muted);font-size:1.1rem;font-weight:400;
+  margin-bottom:3rem;animation:fadeUp .6s .2s ease both
+}
+.hero-actions{
+  display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;
+  animation:fadeUp .6s .3s ease both
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:var(--accent);color:#080a0f;
+  padding:.875rem 2rem;border-radius:8px;
+  font-family:var(--font);font-weight:700;font-size:1rem;
+  text-decoration:none;border:none;cursor:pointer;
+  transition:transform .15s,opacity .2s
+}
+.btn-primary:hover{transform:translateY(-2px);opacity:.92}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:transparent;color:var(--text);
+  padding:.875rem 2rem;border-radius:8px;
+  font-family:var(--font);font-weight:700;font-size:1rem;
+  text-decoration:none;border:1px solid var(--border);cursor:pointer;
+  transition:border-color .2s,transform .15s
+}
+.btn-secondary:hover{border-color:var(--muted);transform:translateY(-2px)}
+.hero-price{
+  margin-top:2rem;font-family:var(--mono);font-size:.8rem;color:var(--muted);
+  animation:fadeUp .6s .4s ease both
+}
+.hero-price strong{color:var(--accent);font-size:1.1rem}
+
+/* ── MOCKUP ── */
+.hero-mockup{
+  position:relative;margin-top:5rem;width:100%;max-width:960px;
+  animation:fadeUp .8s .5s ease both
+}
+.mockup-screen{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;
+  min-height:340px
+}
+.mockup-screen::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(232,255,71,.04) 0%,transparent 60%);
+  pointer-events:none
+}
+.mockup-topbar{display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem}
+.mockup-dot{width:10px;height:10px;border-radius:50%}
+.mockup-dot:nth-child(1){background:#ff5f57}
+.mockup-dot:nth-child(2){background:#febc2e}
+.mockup-dot:nth-child(3){background:#28c840}
+.mockup-title{flex:1;text-align:center;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+
+/* chat */
+.mockup-chat{display:flex;flex-direction:column;gap:.75rem;max-width:480px}
+.msg{display:flex;align-items:flex-start;gap:.75rem}
+.msg-avatar{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);font-size:.65rem;font-weight:700
+}
+.msg-avatar.a1{background:#e8ff47;color:#080a0f}
+.msg-avatar.a2{background:#ff4f6d;color:#fff}
+.msg-avatar.a3{background:#4fffd4;color:#080a0f}
+.msg-bubble{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:0 10px 10px 10px;padding:.5rem .875rem;
+  font-size:.875rem;max-width:340px
+}
+.msg-name{font-size:.7rem;color:var(--muted);font-family:var(--mono);margin-bottom:.2rem}
+
+/* ── OVERLAY NOTIFICATION (coin haut droit) ── */
+.overlay-notif{
+  position:absolute;top:16px;right:16px;
+  display:flex;flex-direction:column;gap:10px;
+  z-index:10
+}
+.notif-card{
+  background:rgba(14,17,24,.96);
+  border:1px solid var(--border);border-radius:12px;
+  width:220px;overflow:hidden;
+  position:relative;
+  animation:slideIn .4s ease both
+}
+.notif-card:nth-child(2){animation-delay:.15s}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+
+/* barre de progression */
+.notif-progress{
+  height:3px;background:var(--border);position:relative;overflow:hidden
+}
+.notif-progress-bar{
+  height:100%;background:var(--accent);
+  animation:progress 10s linear both
+}
+.notif-card:nth-child(2) .notif-progress-bar{
+  background:var(--accent2);
+  animation-duration:4s;
+  animation-delay:.15s
+}
+@keyframes progress{from{width:100%}to{width:0%}}
+
+.notif-body{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:10px
+}
+.notif-pfp{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.65rem;font-family:var(--font)
+}
+.notif-pfp.p1{background:#e8ff47;color:#080a0f}
+.notif-pfp.p2{background:#ff4f6d;color:#fff}
+.notif-content{flex:1;min-width:0}
+.notif-sender{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:4px}
+.notif-media{
+  background:var(--border);border-radius:8px;
+  width:100%;height:70px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.65rem;color:var(--muted);
+  position:relative;overflow:hidden
+}
+.notif-media.is-image{
+  background:linear-gradient(135deg,#1a1f2e,#141720);
+  font-size:1.5rem
+}
+.notif-media.is-audio{
+  background:linear-gradient(135deg,#1a1020,#0e1118);
+  flex-direction:column;gap:4px
+}
+.audio-wave{display:flex;align-items:center;gap:2px}
+.audio-bar{
+  width:3px;border-radius:2px;background:var(--accent2);
+  animation:wave .8s ease infinite alternate
+}
+.audio-bar:nth-child(1){height:8px;animation-delay:0s}
+.audio-bar:nth-child(2){height:16px;animation-delay:.1s}
+.audio-bar:nth-child(3){height:12px;animation-delay:.2s}
+.audio-bar:nth-child(4){height:20px;animation-delay:.3s}
+.audio-bar:nth-child(5){height:10px;animation-delay:.4s}
+.audio-bar:nth-child(6){height:18px;animation-delay:.5s}
+.audio-bar:nth-child(7){height:8px;animation-delay:.6s}
+@keyframes wave{from{transform:scaleY(.5)}to{transform:scaleY(1)}}
+.audio-label{font-family:var(--mono);font-size:.6rem;color:var(--muted)}
+
+/* timer label */
+.notif-timer{
+  font-family:var(--mono);font-size:.6rem;color:var(--muted);
+  padding:0 10px 8px;text-align:right
+}
+
+/* ── SECTIONS ── */
+section{position:relative;padding:6rem 2rem}
+.container{max-width:1100px;margin:0 auto}
+.section-label{font-family:var(--mono);font-size:.75rem;color:var(--accent3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem}
+.section-title{font-family:var(--font);font-weight:800;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.02em;line-height:1.1;margin-bottom:1rem}
+.section-sub{color:var(--muted);font-size:1rem;font-weight:400;max-width:480px}
+
+/* ── FEATURES ── */
+.features-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1px;background:var(--border);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;margin-top:4rem
+}
+.feat{background:var(--surface);padding:2rem;transition:background .2s}
+.feat:hover{background:var(--surface2)}
+.feat-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:1.25rem}
+.feat-icon.y{background:rgba(232,255,71,.12);color:var(--accent)}
+.feat-icon.r{background:rgba(255,79,109,.12);color:var(--accent2)}
+.feat-icon.t{background:rgba(79,255,212,.12);color:var(--accent3)}
+.feat h3{font-family:var(--font);font-weight:700;font-size:1rem;margin-bottom:.5rem}
+.feat p{color:var(--muted);font-size:.875rem;line-height:1.6}
+
+/* limites */
+.limits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-top:2rem}
+.limit-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;text-align:center}
+.limit-val{font-family:var(--font);font-weight:800;font-size:1.5rem;color:var(--accent);margin-bottom:.25rem}
+.limit-type{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+
+/* ── COMMENT CA MARCHE ── */
+.how-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;margin-top:3rem}
+.step{text-align:center;padding:1.5rem}
+.step-num{
+  width:48px;height:48px;border-radius:50%;
+  background:var(--accent);color:#080a0f;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font);font-weight:800;font-size:1.1rem;
+  margin:0 auto 1rem
+}
+.step h3{font-family:var(--font);font-weight:700;font-size:1rem;margin-bottom:.5rem}
+.step p{color:var(--muted);font-size:.875rem}
+
+/* ── ROADMAP ── */
+.roadmap{display:flex;flex-direction:column;gap:0;margin-top:3rem;position:relative}
+.roadmap::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:1px;background:var(--border)}
+.rm-item{display:flex;gap:1.5rem;position:relative;padding-bottom:2.5rem}
+.rm-item:last-child{padding-bottom:0}
+.rm-dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;font-family:var(--mono);position:relative;z-index:1}
+.rm-dot.wip{background:var(--accent);color:#080a0f}
+.rm-dot.todo{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.rm-phase{font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.25rem}
+.rm-title{font-family:var(--font);font-weight:700;font-size:1rem;margin-bottom:.35rem}
+.rm-desc{color:var(--muted);font-size:.875rem}
+
+/* ── PRICING ── */
+.pricing-card{
+  max-width:420px;margin:3rem auto 0;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:2.5rem;text-align:center;
+  position:relative;overflow:hidden
+}
+.pricing-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.pricing-badge{display:inline-block;background:rgba(232,255,71,.1);color:var(--accent);border:1px solid rgba(232,255,71,.2);padding:.25rem .75rem;border-radius:100px;font-family:var(--mono);font-size:.7rem;margin-bottom:1.5rem}
+.pricing-price{font-family:var(--font);font-weight:800;font-size:4rem;line-height:1;color:var(--accent);margin-bottom:.25rem}
+.pricing-price sup{font-size:1.5rem;vertical-align:super}
+.pricing-freq{color:var(--muted);font-size:.875rem;margin-bottom:2rem}
+.pricing-features{list-style:none;text-align:left;margin-bottom:2rem}
+.pricing-features li{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.9rem}
+.pricing-features li:last-child{border-bottom:none}
+.check{color:var(--accent3);font-weight:700}
+
+/* ── GITHUB CTA ── */
+.github-cta{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3rem;text-align:center;margin-top:2rem}
+.github-icon{font-size:3rem;margin-bottom:1rem}
+.github-cta h2{font-family:var(--font);font-weight:800;font-size:2rem;letter-spacing:-.02em;margin-bottom:.75rem}
+.github-cta p{color:var(--muted);margin-bottom:2rem}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-logo{font-family:var(--font);font-weight:800;font-size:.9rem;color:var(--accent)}
+.footer-note{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:.8rem;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+
+@media(max-width:640px){
+  nav{padding:1rem 1.25rem}
+  .nav-links{display:none}
+  .hero h1{font-size:2.5rem}
+  .overlay-notif{display:none}
+  footer{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Drop<span>The</span>Meme</div>
+  <ul class="nav-links">
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#how">Comment ça marche</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#pricing">Prix</a></li>
+  </ul>
+  <a href="https://store.steampowered.com" class="nav-cta">Bientôt sur Steam →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="grid-bg"></div>
+
+  <div class="hero-badge">
+    <span class="dot"></span>
+    En développement actif · V1 bientôt
+  </div>
+
+  <h1>
+    <span style="display:block">Share memes.</span>
+    <span style="display:block"><span class="accent-y">Live.</span> <span class="accent-r">Now.</span></span>
+  </h1>
+
+  <p class="hero-sub">
+    Un overlay Steam pour partager des images, sons et vidéos avec tes amis —
+    directement sur ton écran, pendant que tu joues.
+  </p>
+
+  <div class="hero-actions">
+    <a href="https://store.steampowered.com" class="btn-primary">⊕ Wishlist sur Steam</a>
+    <a href="https://github.com" class="btn-secondary">⌥ GitHub</a>
+  </div>
+
+  <p class="hero-price">Accès complet à vie — <strong>1,99 €</strong> · Une seule fois · Aucun abonnement</p>
+
+  <!-- MOCKUP -->
+  <div class="hero-mockup">
+    <div class="mockup-screen">
+      <div class="mockup-topbar">
+        <div class="mockup-dot"></div>
+        <div class="mockup-dot"></div>
+        <div class="mockup-dot"></div>
+        <div class="mockup-title">DropTheMeme — Groupe : Les Loosers &lt;3</div>
+      </div>
+
+      <div class="mockup-chat">
+        <div class="msg">
+          <div class="msg-avatar a1">BX</div>
+          <div class="msg-bubble">
+            <div class="msg-name">brandon_x · il y a 2 min</div>
+            quelqu'un a vu ça 💀
+          </div>
+        </div>
+        <div class="msg">
+          <div class="msg-avatar a2">KZ</div>
+          <div class="msg-bubble">
+            <div class="msg-name">kizuna · il y a 1 min</div>
+            LMAO j'arrive pas 😭
+          </div>
+        </div>
+        <div class="msg">
+          <div class="msg-avatar a3">NN</div>
+          <div class="msg-bubble">
+            <div class="msg-name">ninazki · à l'instant</div>
+            tiens écoute ça 🔊
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERLAY NOTIFICATIONS haut droite -->
+      <div class="overlay-notif">
+
+        <!-- Notif 1 : image (10 secondes) -->
+        <div class="notif-card">
+          <div class="notif-progress"><div class="notif-progress-bar"></div></div>
+          <div class="notif-body">
+            <div class="notif-pfp p1">BX</div>
+            <div class="notif-content">
+              <div class="notif-sender">brandon_x</div>
+              <div class="notif-media is-image">🐸</div>
+            </div>
+          </div>
+          <div class="notif-timer">disparaît dans 10s</div>
+        </div>
+
+        <!-- Notif 2 : audio (durée son) -->
+        <div class="notif-card">
+          <div class="notif-progress"><div class="notif-progress-bar"></div></div>
+          <div class="notif-body">
+            <div class="notif-pfp p2">NN</div>
+            <div class="notif-content">
+              <div class="notif-sender">ninazki</div>
+              <div class="notif-media is-audio">
+                <div class="audio-wave">
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                  <div class="audio-bar"></div>
+                </div>
+                <div class="audio-label">en cours de lecture…</div>
+              </div>
+            </div>
+          </div>
+          <div class="notif-timer">disparaît à la fin</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-label">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce qu'il faut.<br>Rien de superflu.</h2>
+    <p class="section-sub">Pensé pour ne jamais gêner ton jeu. Léger, rapide, discret.</p>
+
+    <div class="features-grid">
+      <div class="feat">
+        <div class="feat-icon y">🖼</div>
+        <h3>Overlay en jeu</h3>
+        <p>Les médias de tes amis s'affichent en haut à droite de ton écran avec leur photo de profil. Ils disparaissent automatiquement après 10 secondes ou à la fin du son.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon r">🎮</div>
+        <h3>Connexion Steam</h3>
+        <p>Tu te connectes avec ton compte Steam. Zéro inscription, zéro mot de passe à retenir. Ton pseudo et ta photo de profil Steam sont utilisés directement.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon t">👥</div>
+        <h3>Groupes privés</h3>
+        <p>Crée un groupe avec tes amis ou rejoins-en un via un code d'invitation. Seuls les membres du groupe voient tes envois.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon y">💬</div>
+        <h3>Messages instantanés</h3>
+        <p>Envoie du texte en temps réel à tout ton groupe. Les messages s'affichent dans l'overlay sans quitter ton jeu.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon r">🐸</div>
+        <h3>Images &amp; GIFs</h3>
+        <p>Drop des PNG, JPG, WEBP et GIF directement dans le chat. Ils apparaissent dans l'overlay de chaque membre du groupe pendant 10 secondes.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon t">🔊</div>
+        <h3>Sons &amp; vidéos courtes</h3>
+        <p>Envoie un MP3 ou un MP4 court. L'overlay reste visible pour tous pendant toute la durée de la lecture, puis disparaît tout seul.</p>
+      </div>
+    </div>
+
+    <div class="limits-grid">
+      <div class="limit-card">
+        <div class="limit-val">5 MB</div>
+        <div class="limit-type">Images max</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-val">5 MB</div>
+        <div class="limit-type">Audio max</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-val">20 MB</div>
+        <div class="limit-type">Vidéo max</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-val">15 s</div>
+        <div class="limit-type">Durée vidéo max</div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-val">10 s</div>
+        <div class="limit-type">Affichage image</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENT CA MARCHE -->
+<section id="how" class="how-section">
+  <div class="container">
+    <div class="section-label">Comment ça marche</div>
+    <h2 class="section-title">Simple comme bonjour.</h2>
+    <p class="section-sub">Trois étapes et tu drop ton premier mème.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Installe l'app</h3>
+        <p>Télécharge DropTheMeme sur Steam pour 1,99 €. Ça se lance directement depuis ta bibliothèque Steam.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Crée ou rejoins un groupe</h3>
+        <p>Crée un groupe et partage le code à tes amis, ou rejoins-en un existant en deux secondes.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Drop tes mèmes</h3>
+        <p>Lance ton jeu. L'overlay s'affiche automatiquement. Envoie une image, un son ou un texte — tout le groupe le voit instantanément.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="container">
+    <div class="section-label">Roadmap</div>
+    <h2 class="section-title">Ce qui arrive,<br>dans l'ordre.</h2>
+
+    <div class="roadmap">
+      <div class="rm-item">
+        <div class="rm-dot wip">V1</div>
+        <div class="rm-content">
+          <div class="rm-phase">En cours</div>
+          <div class="rm-title">Lancement sur Steam — Windows</div>
+          <div class="rm-desc">Overlay en jeu, connexion Steam, groupes privés, envoi de texte, images, GIF, sons et vidéos courtes. Disponible à 1,99 €.</div>
+        </div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-dot todo">V2</div>
+        <div class="rm-content">
+          <div class="rm-phase">Planifié</div>
+          <div class="rm-title">Réactions &amp; historique</div>
+          <div class="rm-desc">Réagir à un média avec un emoji, voir les derniers envois du groupe même en arrivant en retard dans la session.</div>
+        </div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-dot todo">V3</div>
+        <div class="rm-content">
+          <div class="rm-phase">Futur</div>
+          <div class="rm-title">Linux &amp; macOS</div>
+          <div class="rm-desc">DropTheMeme débarque sur Linux et macOS. Même expérience, même prix, toutes plateformes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="how-section">
+  <div class="container" style="text-align:center">
+    <div class="section-label">Prix</div>
+    <h2 class="section-title">Un prix. Une fois.</h2>
+    <p class="section-sub" style="margin:0 auto">Pas d'abonnement. Pas de surprise. Accès à vie pour le prix d'un café.</p>
+
+    <div class="pricing-card">
+      <div class="pricing-badge">Accès complet · À vie</div>
+      <div class="pricing-price"><sup>€</sup>1,99</div>
+      <div class="pricing-freq">paiement unique via Steam</div>
+      <ul class="pricing-features">
+        <li><span class="check">✓</span> Overlay en jeu always-on-top</li>
+        <li><span class="check">✓</span> Groupes privés illimités</li>
+        <li><span class="check">✓</span> Texte, images, GIF, sons, vidéos</li>
+        <li><span class="check">✓</span> Photo de profil Steam affichée</li>
+        <li><span class="check">✓</span> Toutes les mises à jour V1</li>
+        <li><span class="check">✓</span> Support Windows (Linux &amp; macOS en V3)</li>
+      </ul>
+      <a href="https://store.steampowered.com" class="btn-primary" style="width:100%;justify-content:center">
+        Wishlist sur Steam →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- GITHUB -->
+<section>
+  <div class="container">
+    <div class="github-cta">
+      <div class="github-icon">⌥</div>
+      <h2>100% open source</h2>
+      <p>Le projet est entièrement public sur GitHub. Tu peux suivre l'avancement, signaler un bug ou contribuer.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="https://github.com" class="btn-primary">Voir sur GitHub →</a>
+        <a href="https://github.com" class="btn-secondary">Lire le README</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">DropTheMeme</div>
+  <div class="footer-note">// v1.0 · bientôt sur Steam · fait avec 🐸</div>
+  <div class="footer-links">
+    <a href="https://github.com">GitHub</a>
+    <a href="https://store.steampowered.com">Steam</a>
+  </div>
+</footer>
+
+</body>
+</html>
